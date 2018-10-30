@@ -1,0 +1,28 @@
+<phpunit
+        colors                                  = "true"
+        convertErrorsToExceptions               = "true"
+        convertNoticesToExceptions              = "true"
+        convertWarningsToExceptions             = "true"
+        syntaxCheck                             = "true"
+        beStrictAboutTestsThatDoNotTestAnything = "true"
+        beStrictAboutOutputDuringTests          = "true"
+        beStrictAboutChangesToGlobalState       = "true"
+>
+    <testsuites>
+        <testsuite name="Test">
+            <directory suffix="Test.php">test/phpunit/</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="testdox-html" target="build/logs/testdox.html"/>
+        <log type="junit" target="build/logs/junit.xml" logIncompleteSkipped="false"/>
+        <log type="coverage-html" target="build/logs/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-text" target="build/logs/coverage.txt"/>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+    </logging>
+</phpunit>
