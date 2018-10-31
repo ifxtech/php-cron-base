@@ -11,10 +11,15 @@ use szczad\schedule\Scheduler;
 class CronRunner {
     private $processing = false;
     private $running = false;
+    /**
+     * @var Scheduler
+     */
     private $scheduler;
+    private $job_processor;
 
-    public function __construct($scheduler) {
+    public function __construct($scheduler, $job_processor) {
         $this->scheduler = $scheduler;
+        $this->job_processor = $job_processor;
     }
 
     public function run() {
@@ -23,6 +28,7 @@ class CronRunner {
         $this->processing = true;
         while ($this->processing) {
 
+            $time = $this->scheduler->getTimeToNextJob();
         }
         $this->cleanup();
 

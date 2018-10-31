@@ -11,7 +11,7 @@ namespace szczad\job;
 
 use szczad\schedule\Schedule;
 
-class Job  {
+class Job {
     const OUT = "OUT";
     const ERR = "ERR";
 
@@ -45,6 +45,22 @@ class Job  {
      */
     public function getCommand() {
         return $this->getCommand();
+    }
+
+    public function run() {
+        return $this->job_impl->run();
+    }
+
+    public function isRunning() {
+        return $this->job_impl->isRunning();
+    }
+
+    public function terminate() {
+        $this->job_impl->terminate();
+    }
+
+    public function forceTerminate() {
+        $this->job_impl->terminate();
     }
 
     /**
