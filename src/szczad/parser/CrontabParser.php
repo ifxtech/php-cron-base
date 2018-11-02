@@ -14,6 +14,7 @@ use szczad\exceptions\UnknownNamedPeriodException;
 use szczad\job\JobBuilder;
 use szczad\schedule\CrontabPeriodicSchedule;
 use szczad\schedule\Schedule;
+use szczad\schedule\Scheduler;
 use szczad\util\Log;
 
 class CrontabParser {
@@ -65,6 +66,27 @@ class CrontabParser {
         $this->job_builder = $job_builder;
         $this->crontab_class = $crontab_schedule_implementation;
         $this->logger = Log::getInstance();
+    }
+
+    /**
+     * @param string $filename
+     * @return Scheduler
+     */
+    public function getSchedulerFromFile($filename) {
+        $schedules = [];
+        $fd = fopen($filename, 'r');
+        try {
+            while (($content = fgets($fd)) !== false) {
+                $schedule = $this->getSchedule($content);
+                if ($schedule !== null)
+                    $schedules[] = $schedule;
+            }
+        } finally {
+            fclose($fd);
+        }
+
+        $scheduler = new Scheduler($schedules);
+        return $scheduler;
     }
 
     /**

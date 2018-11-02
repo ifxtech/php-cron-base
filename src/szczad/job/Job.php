@@ -29,7 +29,7 @@ class Job {
      * AbstractJob constructor.
      * @param JobHandler $job_impl
      */
-    function __construct($job_impl) {
+    protected function __construct($job_impl) {
         $this->job_impl = $job_impl;
     }
 

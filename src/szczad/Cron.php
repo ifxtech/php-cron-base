@@ -1,31 +1,39 @@
 <?php
+
+namespace szczad;
+
 /**
  * User: szczad
  * Date: 23.10.18
  * Time: 14:04
  */
 
-namespace szczad;
 
-use CronRunner;
+use szczad\job\JobProcessor;
 use szczad\schedule\Scheduler;
+
+declare(ticks = 1);
 
 class Cron {
     private $runner;
-    private $scheduler;
 
-    public function __construct() {
-        $this->scheduler = new Scheduler();
-        $this->runner = new CronRunner($this->scheduler);
+    public function __construct($scheduler = null, $processor = null) {
+        $scheduler = $scheduler ?: new Scheduler();
+        $processor = $processor ?: new JobProcessor();
 
-
-        pcntl_signal(SIGTERM, function($signo, $sig) {
+        $this->runner = new CronRunner($scheduler, $processor);
+        $fn = function($signo, $sig) {
             switch ($signo) {
                 case SIGTERM:
-                    echo "Killing remaining jobs and quitting...";
+                case SIGINT:
+                    echo "Killing remaining jobs and quitting...\n";
                     $this->runner->stop();
+                    break;
             }
-        });
+        };
+
+        pcntl_signal(SIGTERM, $fn);
+        pcntl_signal(SIGINT, $fn);
     }
 
 

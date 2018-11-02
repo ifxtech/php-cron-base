@@ -1,5 +1,8 @@
 <?php
 
+namespace szczad;
+
+use szczad\job\JobProcessor;
 use szczad\schedule\Scheduler;
 
 /**
@@ -11,15 +14,19 @@ use szczad\schedule\Scheduler;
 class CronRunner {
     private $processing = false;
     private $running = false;
-    /**
-     * @var Scheduler
-     */
     private $scheduler;
     private $job_processor;
+    private $logger;
 
-    public function __construct($scheduler, $job_processor) {
+    /**
+     * CronRunner constructor.
+     * @param Scheduler $scheduler
+     * @param JobProcessor $job_processor
+     */
+    public function __construct($scheduler, $job_processor, $logger = null) {
         $this->scheduler = $scheduler;
         $this->job_processor = $job_processor;
+        $this->logger = $logger;
     }
 
     public function run() {
@@ -27,8 +34,10 @@ class CronRunner {
 
         $this->processing = true;
         while ($this->processing) {
-
-            $time = $this->scheduler->getTimeToNextJob();
+            $this->job_processor->update();
+//            $timer = $this->job_processor->isProcessing() ? 1 : $this->scheduler->getTimeToNextJob();
+            $timer = 1;
+            sleep($timer);
         }
         $this->cleanup();
 
