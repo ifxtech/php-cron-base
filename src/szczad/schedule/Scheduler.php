@@ -9,17 +9,14 @@
 namespace szczad\schedule;
 
 
+use szczad\job\JobBuilder;
+
 class Scheduler {
 
     /**
      * @var Schedule[]
      */
     private $schedules;
-
-    /**
-     * @var Schedule
-     */
-    private $next_schedule = null;
 
     public function __construct($schedules = []) {
         $this->schedules = $schedules;
@@ -30,14 +27,13 @@ class Scheduler {
      * @return bool true if operation succeeds, false otherwise
      */
     public function addSchedule($schedule) {
-        if (!in_array($schedule, $this->schedules)) {
-            $this->schedules[] = $schedule;
-            $this->updateTimetable();
+        if (in_array($schedule, $this->schedules))
+            return false;
 
-            return true;
-        }
+        $this->schedules[] = $schedule;
+        $this->update();
 
-        return false;
+        return true;
     }
 
     /**
@@ -47,7 +43,7 @@ class Scheduler {
     public function removeSchedule($schedule) {
         if (($key = array_search($schedule, $this->schedules)) !== false) {
             unset($this->schedules[$key]);
-            $this->updateTimetable();
+            $this->update();
 
             return true;
         }
@@ -55,25 +51,37 @@ class Scheduler {
         return false;
     }
 
+    public function update() {
+        usort($this->schedules, "self::sort");
+    }
+
     /**
      * @return bool|int Returns amount of seconds till next schedule or
      */
-    public function getTimeToNextJob() {
-        if ($this->next_schedule === null)
+    public function getTimeToNextJobs() {
+        if (count($this->schedules) === 0)
             return false;
 
-        $time = $this->next_schedule->compare(time());
+        $time = $this->schedules[0]->compare(time());
         return ($time > 0) ? $time : false;
     }
 
-    private function updateTimetable() {
-        $current = null;
+    /**
+     * @param JobBuilder $builder
+     * @return array
+     */
+    public function getJobs($builder) {
+        $time = time();
+        $jobs = [];
         foreach ($this->schedules as $schedule) {
-            $seconds = $schedule->compare($current);
-            if ($seconds >= 0)
-                $current = $schedule;
+            if ($schedule->compare($time) === 0)
+                $jobs[] = $schedule->getJob($builder);
         }
-
-        $this->next_schedule = $current;
+        return $jobs;
     }
+
+    private static function sort($left, $right) {
+        return $left->compare($right);
+    }
+
 }

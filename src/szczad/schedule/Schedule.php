@@ -11,7 +11,7 @@ namespace szczad\schedule;
 
 use DateTime;
 use szczad\job\JobBuilder;
-use szczad\job\JobHandler;
+use szczad\job\JobInterface;
 
 class Schedule implements ScheduleInterface {
     /**
@@ -38,7 +38,7 @@ class Schedule implements ScheduleInterface {
 
     /**
      * @param JobBuilder $builder
-     * @return JobHandler
+     * @return JobInterface
      */
     public function getJob($builder) {
         return $this->schedule_impl->getJob($builder);
@@ -56,8 +56,8 @@ class Schedule implements ScheduleInterface {
             return -INF;
 
         $current_seconds = $this->schedule_impl->getNextRun()->getTimestamp();
-        $schedule_seconds = ($schedule instanceof Schedule) ? $schedule->getNextRun()->getTimestamp() : $schedule;
+        $compare_seconds = ($schedule instanceof Schedule) ? $schedule->getNextRun()->getTimestamp() : $schedule;
 
-        return $schedule_seconds - $current_seconds;
+        return $compare_seconds - $current_seconds;
     }
 }

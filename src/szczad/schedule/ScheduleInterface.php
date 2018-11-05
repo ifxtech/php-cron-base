@@ -9,7 +9,7 @@ namespace szczad\schedule;
 
 use DateTime;
 use szczad\job\JobBuilder;
-use szczad\job\JobHandler;
+use szczad\job\JobInterface;
 
 interface ScheduleInterface {
     /**
@@ -20,7 +20,7 @@ interface ScheduleInterface {
 
     /**
      * @param JobBuilder $builder
-     * @return JobHandler
+     * @return JobInterface
      */
     public function getJob($builder);
 }

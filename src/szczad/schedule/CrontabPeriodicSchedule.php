@@ -13,7 +13,7 @@ use DateInterval;
 use DateTime;
 use Exception;
 use szczad\job\JobBuilder;
-use szczad\job\JobHandler;
+use szczad\job\JobInterface;
 
 class CrontabPeriodicSchedule implements ScheduleInterface {
     private $command;
@@ -44,7 +44,7 @@ class CrontabPeriodicSchedule implements ScheduleInterface {
 
     /**
      * @param JobBuilder $builder
-     * @return JobHandler
+     * @return JobInterface
      */
     public function getJob($builder) {
         return $builder->getJob($this, $this->command);

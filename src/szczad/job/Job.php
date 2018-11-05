@@ -11,46 +11,47 @@ namespace szczad\job;
 
 use szczad\schedule\Schedule;
 
-class Job {
-    const OUT = "OUT";
-    const ERR = "ERR";
-
-    private $log = array();
+class Job implements JobInterface {
     /**
      * @var Schedule
      */
-    protected $schedule;
+    private $schedule;
     /**
-     * @var JobHandler
+     * @var JobInterface
      */
-    protected $job_impl;
+    private $job_impl;
 
     /**
      * AbstractJob constructor.
-     * @param JobHandler $job_impl
+     * @param Schedule $schedule
+     * @param JobInterface $job_impl
      */
-    protected function __construct($job_impl) {
+    public function __construct($schedule, $job_impl) {
         $this->job_impl = $job_impl;
+        $this->schedule = $schedule;
     }
 
     /**
      * @return Schedule
      */
     public function getSchedule() {
-        return $this->job_impl->getSchedule();
+        return $this->schedule;
     }
 
     /**
      * @return string
      */
     public function getCommand() {
-        return $this->getCommand();
+        return $this->job_impl->getCommand();
     }
 
     public function run() {
         return $this->job_impl->run();
     }
 
+    /**
+     * @return bool
+     */
     public function isRunning() {
         return $this->job_impl->isRunning();
     }
@@ -59,35 +60,14 @@ class Job {
         $this->job_impl->terminate();
     }
 
-    public function forceTerminate() {
-        $this->job_impl->terminate();
+    public function update() {
+        $this->job_impl->update();
     }
 
     /**
-     * @param string|null $type
-     * @return array
+     * @return int
      */
-    public function getOutput($type = null) {
-        $temp_array = array();
-        foreach($this->log as $line) {
-            if (($type === null) || ($line["type"] === $type)) {
-                array_push($temp_array, sprintf("%s: %s", $line["type"], $line["line"]));
-            }
-        }
-
-        return $temp_array;
+    public function getResultCode() {
+        return $this->job_impl->getResultCode();
     }
-
-    /**
-     * @param string $type
-     * @param string $line
-     */
-    public function addLog($type, $line) {
-        if (($type === Job::OUT) || ($type === Job::ERR))
-            array_push($this->log, array("type" => $type, "line" => $line));
-        else
-            throw new \InvalidArgumentException("Output type should be AbstractJob::OUT or AbstractJob::ERR");
-    }
-
-
 }

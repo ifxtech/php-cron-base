@@ -37,7 +37,7 @@ class JobBuilder {
     /**
      * @param Schedule $schedule
      * @param string $command
-     * @return JobHandler|null
+     * @return Job|null
      */
     public function getJob($schedule, $command) {
         foreach ($this->job_classes as $job) {
