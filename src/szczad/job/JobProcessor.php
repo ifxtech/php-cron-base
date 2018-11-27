@@ -9,6 +9,7 @@ namespace szczad\job;
 
 
 class JobProcessor {
+
     /**
      * @var Job[]
      */

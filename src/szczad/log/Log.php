@@ -6,7 +6,7 @@
  * Time: 09:56
  */
 
-namespace szczad\util;
+namespace szczad\log;
 
 use Exception;
 use Psr\Log\LoggerInterface;

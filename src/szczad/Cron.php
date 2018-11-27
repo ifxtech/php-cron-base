@@ -36,7 +36,6 @@ class Cron {
         pcntl_signal(SIGINT, $fn);
     }
 
-
     public function run() {
         $this->runner->run();
     }

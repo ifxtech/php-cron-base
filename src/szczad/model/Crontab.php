@@ -6,18 +6,17 @@
  * Time: 09:40
  */
 
-namespace szczad\parser;
+namespace szczad\model;
 
 
 use szczad\exceptions\InvalidPeriodValueException;
 use szczad\exceptions\UnknownNamedPeriodException;
-use szczad\job\JobBuilder;
 use szczad\schedule\CrontabPeriodicSchedule;
 use szczad\schedule\Schedule;
 use szczad\schedule\Scheduler;
-use szczad\util\Log;
+use szczad\log\Log;
 
-class CrontabParser {
+class Crontab implements BaseModel {
     const DAY_OF_WEEK = [
         'SUN' => 0,
         'MON' => 1,
@@ -53,40 +52,49 @@ class CrontabParser {
         '@reboot'   => 'self::generatorNamedReboot'
     ];
 
-    private $job_builder;
     private $crontab_class;
-    private $logger;
+    private $log;
+    private $filename;
 
     /**
-     * CrontabParser constructor.
-     * @param JobBuilder $job_builder
+     * Crontab constructor.
+     * @param string $filename Filename to load entries from
      * @param string $crontab_schedule_implementation
      */
-    public function __construct($job_builder, $crontab_schedule_implementation = CrontabPeriodicSchedule::class) {
-        $this->job_builder = $job_builder;
+    public function __construct($filename, $crontab_schedule_implementation = CrontabPeriodicSchedule::class) {
+        $this->filename = $filename;
         $this->crontab_class = $crontab_schedule_implementation;
-        $this->logger = Log::getInstance();
     }
 
     /**
-     * @param string $filename
+     * @param string $filename Filename to load entries from
+     */
+    public function setFilename($filename) {
+        $this->filename = $filename;
+    }
+
+    /**
      * @return Scheduler
      */
-    public function getSchedulerFromFile($filename) {
+    public function getScheduler() {
+        Log::getInstance()->info("Loading entries from file {file}", ['file' => $this->filename]);
+        $counter = 0;
         $schedules = [];
-        $fd = fopen($filename, 'r');
+        $fd = fopen($this->filename, 'r');
         try {
             while (($content = fgets($fd)) !== false) {
                 $schedule = $this->getSchedule($content);
-                if ($schedule !== null)
+                if ($schedule !== null) {
                     $schedules[] = $schedule;
+                    $counter++;
+                }
             }
         } finally {
             fclose($fd);
+            Log::getInstance()->info("Loaded {count} entries from file {file}.", ['file' => $this->filename, 'count' => $counter]);
         }
 
-        $scheduler = new Scheduler($schedules);
-        return $scheduler;
+        return new Scheduler($schedules);
     }
 
     /**
@@ -94,16 +102,17 @@ class CrontabParser {
      * @return Schedule|null
      */
     public function getSchedule($line) {
-        $this->logger->debug("Processing {line}", ['line' => $line]);
+        $log = Log::getInstance();
+        $log->debug("Processing {line}", ['line' => $line]);
 
         try {
             $num_args = $this->fixLine($line);
             $values = $this->lineToConstructorArgs($line, $num_args);
         } catch (UnknownNamedPeriodException $e) {
-            $this->logger->debug("Unknown named period in line: {line}", ['line' => $line]);
+            $log->debug("Unknown named period in line: {line}", ['line' => $line]);
             return null;
         } catch (InvalidPeriodValueException $e) {
-            $this->logger->debug("Invalid period definition in line: {line}", ['line' => $line]);
+            $log->debug("Invalid period definition in line: {line}", ['line' => $line]);
             return null;
         }
 
